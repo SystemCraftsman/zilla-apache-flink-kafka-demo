@@ -16,6 +16,7 @@ import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsIni
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -32,6 +33,9 @@ public class StreamProcessingService {
     @Autowired
     private TaskTransformerProcessFunction taskTransformerProcessFunction;
 
+    @Value("${kafka.bootstrap.servers}")
+    private String bootstrapServers;
+
     @PostConstruct
     public void process() throws Exception {
 
@@ -40,7 +44,7 @@ public class StreamProcessingService {
 
         // Initialize the Kafka source, which consumes task commands from the related topic
         KafkaSource<TaskCommand> taskCommandsSource = KafkaSource.<TaskCommand>builder()
-                .setBootstrapServers("localhost:9092")
+                .setBootstrapServers(bootstrapServers)
                 .setGroupId("task-consumer-group")
                 .setStartingOffsets(OffsetsInitializer.latest())
                 .setTopics("task-commands")
@@ -68,7 +72,7 @@ public class StreamProcessingService {
 
         // Initialize the Kafka sink, which produces transformed tasks to the related topic
         KafkaSink<Task> taskSnapshotsSink = KafkaSink.<Task>builder()
-                .setBootstrapServers("localhost:9092")
+                .setBootstrapServers(bootstrapServers)
                 .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
                 .setRecordSerializer(new TaskSerializer("task-snapshots"))
                 .build();
