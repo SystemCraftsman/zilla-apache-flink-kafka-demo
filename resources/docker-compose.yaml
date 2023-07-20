@@ -48,21 +48,10 @@ services:
       bin/kafka-topics.sh --bootstrap-server kafka.internal.net:29092 --list --topic 'task-.*'
       echo '## Creating the Kafka topics'
       bin/kafka-topics.sh --bootstrap-server kafka.internal.net:29092 --create --if-not-exists --topic task-commands --partitions 1
-      bin/kafka-topics.sh --bootstrap-server kafka.internal.net:29092 --create --if-not-exists --topic task-replies --partitions 1
       bin/kafka-topics.sh --bootstrap-server kafka.internal.net:29092 --create --if-not-exists --topic task-snapshots --config cleanup.policy=compact --partitions 1
       echo ''
       echo '## Created the Kafka topics'
       bin/kafka-topics.sh --bootstrap-server kafka.internal.net:29092 --list --topic 'task-.*'
       "
 
-  zilla:
-    image: "ghcr.io/aklivity/zilla:latest"
-    container_name: zilla
-    hostname: "zilla"
-    command: [ "start", "-v", "-e" ]
-    volumes:
-      - ./zilla.yaml:/etc/zilla/zilla.yaml:ro
-    ports:
-      - "8080:8080"
-
-
+  #TODO: Add the Zilla configuration
