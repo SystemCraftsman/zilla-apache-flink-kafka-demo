@@ -33,16 +33,17 @@ public class StreamProcessingService {
     @Autowired
     private TaskTransformerProcessFunction taskTransformerProcessFunction;
 
+    // Injects the Kafka bootstrap servers configuration value
     @Value("${kafka.bootstrap.servers}")
     private String bootstrapServers;
 
     @PostConstruct
     public void process() throws Exception {
 
-        // Initialize the execution environment for Flink stream processing
+        // Initializes the execution environment for Flink stream processing
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-        // Initialize the Kafka source, which consumes task commands from the related topic
+        // Initializes the Kafka source, which consumes task commands from the related topic
         KafkaSource<TaskCommand> taskCommandsSource = KafkaSource.<TaskCommand>builder()
                 .setBootstrapServers(bootstrapServers)
                 .setGroupId("task-consumer-group")
@@ -51,36 +52,36 @@ public class StreamProcessingService {
                 .setDeserializer(new CommandDeserializer())
                 .build();
 
-        // Add Kafka consumer as a source to the execution environment
+        // Adds Kafka consumer as a source to the execution environment
         DataStream<TaskCommand> kafkaStream = env.fromSource(taskCommandsSource, WatermarkStrategy.noWatermarks(), "Kafka Source");
 
-        // Process the stream for command validation
+        // Processes the stream for command validation
         DataStream<TaskCommand> validatedCommandStream = kafkaStream
                 .keyBy(TaskCommand::getTaskId)
                 .process(commandValidationProcessFunction);
 
-        // Process the stream for profanity check
+        // Processes the stream for profanity check
         DataStream<TaskCommand> checkedContentStream = validatedCommandStream
                 .filter(taskCommand -> !taskCommand.getCommandType().equals(CommandType.DELETE))
                 .keyBy(TaskCommand::getTaskId)
                 .process(profanityCheckProcessFunction);
 
-        // Process the stream for command to task transformation
+        // Processes the stream for command to task transformation
         DataStream<Task> taskStream = checkedContentStream
                 .keyBy(TaskCommand::getTaskId)
                 .process(taskTransformerProcessFunction);
 
-        // Initialize the Kafka sink, which produces transformed tasks to the related topic
+        // Initializes the Kafka sink, which produces transformed tasks to the related topic
         KafkaSink<Task> taskSnapshotsSink = KafkaSink.<Task>builder()
                 .setBootstrapServers(bootstrapServers)
                 .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
                 .setRecordSerializer(new TaskSerializer("task-snapshots"))
                 .build();
 
-        // Add the Kafka sink to the last processed stream; task stream
+        // Adds the Kafka sink to the last processed stream; task stream
         taskStream.sinkTo(taskSnapshotsSink);
 
-        // Execute the job
+        // Executes the job
         env.execute("Todo App");
     }
 }
