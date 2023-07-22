@@ -55,8 +55,7 @@ public class StreamProcessingService {
         //TODO: Initialize the Kafka sink, which produces transformed tasks to the "task-snapshots" topic
         KafkaSink<Task> taskSnapshotsSink = null;
 
-        // Adds the Kafka sink to the last processed stream; task stream
-        taskStream.sinkTo(taskSnapshotsSink);
+        //TODO: Add the Kafka sink to the last processed stream; task stream
 
         // Executes the job
         env.execute("Todo App");
