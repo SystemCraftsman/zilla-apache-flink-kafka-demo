@@ -52,7 +52,7 @@ public class StreamProcessingService {
                 .setDeserializer(new CommandDeserializer())
                 .build();
 
-        // Adds Kafka consumer as a source to the execution environment
+        // Uses the Kafka source to create a data stream
         DataStream<TaskCommand> kafkaStream = env.fromSource(taskCommandsSource, WatermarkStrategy.noWatermarks(), "Kafka Source");
 
         // Processes the stream for command validation
