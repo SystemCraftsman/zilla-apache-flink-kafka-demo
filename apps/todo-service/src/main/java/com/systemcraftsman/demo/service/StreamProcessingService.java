@@ -40,7 +40,7 @@ public class StreamProcessingService {
         //TODO: Initialize the Kafka source, which consumes task commands from the "task-commands" topic
         KafkaSource<TaskCommand> taskCommandsSource = null;
 
-        // Adds Kafka consumer as a source to the execution environment
+        // Uses the Kafka source to create a data stream
         DataStream<TaskCommand> kafkaStream = env.fromSource(taskCommandsSource, WatermarkStrategy.noWatermarks(), "Kafka Source");
 
         //TODO: Process the stream for command validation by using the processor function for command validation
