@@ -62,7 +62,6 @@ public class StreamProcessingService {
 
         // Processes the stream for profanity check
         DataStream<TaskCommand> checkedContentStream = validatedCommandStream
-                .filter(taskCommand -> !taskCommand.getCommandType().equals(CommandType.DELETE))
                 .keyBy(TaskCommand::getTaskId)
                 .process(profanityCheckProcessFunction);
 

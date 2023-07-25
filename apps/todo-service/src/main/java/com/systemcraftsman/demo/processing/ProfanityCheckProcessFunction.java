@@ -1,5 +1,6 @@
 package com.systemcraftsman.demo.processing;
 
+import com.systemcraftsman.demo.model.CommandType;
 import com.systemcraftsman.demo.model.TaskCommand;
 import com.systemcraftsman.demo.service.ProfanityService;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
@@ -18,8 +19,9 @@ public class ProfanityCheckProcessFunction extends KeyedProcessFunction<String, 
     @Override
     public void processElement(TaskCommand taskCommand, Context ctx, Collector<TaskCommand> out) {
         for (String badWord : profanityService.getBadWords()) {
-            if (taskCommand.getTaskContent().contains(badWord)){
-                String replacedContent = taskCommand.getTaskContent().replaceAll(badWord, "***");
+            if (!taskCommand.getCommandType().equals(CommandType.DELETE) &&
+                    taskCommand.getTaskContent().toLowerCase().contains(badWord)) {
+                String replacedContent = taskCommand.getTaskContent().replaceAll("(?i)" + badWord, "***");
                 taskCommand.setTaskContent(replacedContent);
             }
         }
